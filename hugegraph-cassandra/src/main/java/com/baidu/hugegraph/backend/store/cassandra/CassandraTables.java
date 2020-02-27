@@ -32,6 +32,7 @@ import com.baidu.hugegraph.backend.id.IdGenerator;
 import com.baidu.hugegraph.backend.id.IdUtil;
 import com.baidu.hugegraph.backend.query.Query;
 import com.baidu.hugegraph.backend.store.BackendEntry;
+import com.baidu.hugegraph.backend.store.BackendEntryIterator;
 import com.baidu.hugegraph.type.HugeType;
 import com.baidu.hugegraph.type.define.Directions;
 import com.baidu.hugegraph.type.define.HugeKeys;
@@ -470,7 +471,8 @@ public class CassandraTables {
             E.checkState(next != null && next.type().isEdge(),
                          "The next entry must be EDGE");
 
-            if (current != null) {
+            long maxSize = BackendEntryIterator.INLINE_BATCH_SIZE;
+            if (current != null && current.columnsSize() < maxSize) {
                 Object nextVertexId = next.column(HugeKeys.OWNER_VERTEX);
                 if (current.id().equals(IdGenerator.of(nextVertexId))) {
                     current.subRow(next.row());
